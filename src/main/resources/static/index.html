@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Ticket Booking</title>
+    <style>
+        /* Resetting default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        label {
+            font-size: 1rem;
+            margin: 10px 0;
+            display: block;
+            font-weight: bold;
+        }
+
+        select, input {
+            padding: 10px;
+            font-size: 1rem;
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        span {
+            background-color: #f0f0f0;
+            padding: 8px;
+            display: inline-block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 600px) {
+            form {
+                padding: 15px;
+            }
+
+            button {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Bus Ticket Booking</h1>
+
+<!-- Select Route Form -->
+<form id="ticketForm">
+    <label for="route">Select Route:</label>
+    <select id="route" name="route" required>
+        <option value="" disabled selected>Select a route</option>
+        <!-- Options will be populated dynamically -->
+    </select>
+
+    <label for="price">Price: ₹</label>
+    <span id="price"></span>
+
+    <label for="company">Travel Company:</label>
+    <span id="company"></span>
+
+    <label for="seats">Available Seats:</label>
+    <span id="seats"></span>
+
+    <label for="date">Travel Date:</label>
+    <input type="date" id="date" name="date" required min="" />
+    <!-- 'min' attribute dynamically sets the minimum date to today -->
+
+    <label for="name">Your Name:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="payment">Payment Method:</label>
+    <select id="payment" name="payment" required>
+        <option value="creditCard">Credit Card</option>
+        <option value="debitCard">Debit Card</option>
+        <option value="netBanking">Net Banking</option>
+        <option value="cod">Cash on Delivery</option>
+    </select>
+
+    <button type="submit">Book Ticket</button>
+</form>
+
+<script>
+    // Fetch routes from backend when the page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set the minimum date for the date picker to today
+        const today = new Date().toISOString().split('T')[0]; // Get today's date in yyyy-mm-dd format
+        document.getElementById("date").setAttribute("min", today);
+
+        fetch('http://localhost:8080/api/routes')  // Ensure the backend is running at this URL
+            .then(response => response.json())
+            .then(routes => {
+                let routeSelect = document.getElementById("route");
+                routes.forEach(route => {
+                    let option = document.createElement("option");
+                    option.value = route.routeName;
+                    option.textContent = `${route.routeName} - ₹${route.price} (${route.travelCompany})`;
+                    routeSelect.appendChild(option);
+                });
+
+                routeSelect.addEventListener('change', function () {
+                    const selectedRouteName = routeSelect.value;
+                    const selectedRoute = routes.find(route => route.routeName === selectedRouteName);
+                    updateRouteDetails(selectedRoute);
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching routes:", error);
+            });
+    });
+
+    // Function to update route details on the form
+    function updateRouteDetails(route) {
+        document.getElementById("price").textContent = route.price;
+        document.getElementById("company").textContent = route.travelCompany;
+        document.getElementById("seats").textContent = route.availableSeats;
+    }
+
+    // Handle form submission to book the ticket
+    document.getElementById('ticketForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const selectedRoute = document.getElementById("route").value;
+        const travelDate = document.getElementById("date").value;
+        const userName = document.getElementById("name").value;
+        const userEmail = document.getElementById("email").value;
+        const paymentMethod = document.getElementById("payment").value;
+
+        const ticketData = {
+            route: selectedRoute,
+            travelDate: travelDate,
+            name: userName,
+            email: userEmail,
+            paymentMethod: paymentMethod
+        };
+
+        // Make POST request to backend to book the ticket
+        fetch('http://localhost:8080/api/tickets/book', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(ticketData)
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);  // Display success message
+            document.getElementById("ticketForm").reset();  // Reset the form
+        })
+        .catch(error => {
+            console.error("Error booking ticket:", error);
+            alert("Something went wrong! Please try again.");
+        });
+    });
+</script>
+
+</body>
+</html>
