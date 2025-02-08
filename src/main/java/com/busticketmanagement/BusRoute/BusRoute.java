@@ -8,7 +8,6 @@ public class BusRoute {
     private int availableSeats;
     private String travelDate;
 
-    // Constructor
     public BusRoute(String routeName, String travelCompany, double price, int availableSeats, String travelDate) {
         this.routeName = routeName;
         this.travelCompany = travelCompany;

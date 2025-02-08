@@ -7,7 +7,6 @@ public class TravelCompany {
     private String address;
     private double rating;      // Rating out of 5
 
-    // Constructor
     public TravelCompany(String name, String contactNumber, String address, double rating) {
         this.name = name;
         this.contactNumber = contactNumber;
@@ -15,7 +14,6 @@ public class TravelCompany {
         this.rating = rating;
     }
 
-    // Getters and setters
     public String getName() {
         return name;
     }
