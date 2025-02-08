@@ -11,6 +11,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+
 @Service
 public class EmailService {
     @Value("${spring.mail.username}")
@@ -28,7 +30,7 @@ public class EmailService {
     }
 
     @Async
-    public void sendEmail(String to, String subject, Ticket ticket) throws MessagingException {
+    public void sendEmail(String to, String subject, Ticket ticket) throws MessagingException, UnsupportedEncodingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
@@ -37,8 +39,7 @@ public class EmailService {
         helper.setTo(to);
         helper.setText(htmlContent, true);
         helper.setSubject(subject);
-        helper.setFrom(senderEmail);
-
+        helper.setFrom(senderEmail,"Sufiyan");
         javaMailSender.send(mimeMessage);
     }
 
